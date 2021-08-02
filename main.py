@@ -28,6 +28,7 @@ resources = {
     "water": 300,
     "milk": 200,
     "coffee": 100,
+    "money": 0,
 }
 
 
@@ -57,22 +58,48 @@ def make_coffee(selection):
     water = 0
     milk = 0
     coffee = 0
-    for ingredient in MENU[selection]['ingredients']:
-        if resources[ingredient] < MENU[selection]['ingredients'][ingredient]:
-            print(f"Sorry, {selection} is currently unavailable.")
+    for ingredient in selection['ingredients']:
+        if resources[ingredient] < selection['ingredients'][ingredient]:
             return False
         else:
             if ingredient == "milk":
-                milk += MENU[selection]['ingredients'][ingredient]
+                milk += selection['ingredients'][ingredient]
             elif ingredient == "water":
-                water += MENU[selection]['ingredients'][ingredient]
+                water += selection['ingredients'][ingredient]
             elif ingredient == "coffee":
-                coffee += MENU[selection]['ingredients'][ingredient]
+                coffee += selection['ingredients'][ingredient]
     resources['water'] -= water
     resources['milk'] -= milk
     resources['coffee'] -= coffee
-    print(resources)
     return True
 
 
-print(make_coffee('latte'))
+def report():
+    for item in resources:
+        print(f"{item} : {resources[item]}")
+
+
+def machine():
+    off = False
+    while not off:
+        selection = input("What would you like? (espresso/latte/cappuccino):")
+        if selection == 'off':
+            off = True
+            print("powering down...")
+        elif selection == "report":
+            report()
+        elif selection not in MENU:
+            print('not a valid selection')
+        else:
+            process = MENU[selection]
+            payment = process_payment(process['cost'])
+            if payment:
+                coffee = make_coffee(process)
+                if not coffee:
+                    print(f"Sorry, {selection} is currently unavailable.")
+                    print('returning your payment...')
+                else:
+                    resources['money'] += process['cost']
+                    print("Here's your coffee!")
+
+machine()
